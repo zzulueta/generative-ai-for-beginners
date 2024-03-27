@@ -2,29 +2,30 @@ from openai import AzureOpenAI
 import os
 import requests
 from PIL import Image
-import dotenv
+import os
+from dotenv import load_dotenv
 import json
 
-# import dotenv
-dotenv.load_dotenv()
-
- 
+# Load environment variables from .env file
+load_dotenv()
 
 # Assign the API version (DALL-E is currently supported for the 2023-06-01-preview API version only)
 client = AzureOpenAI(
-  api_key=os.environ['AZURE_OPENAI_KEY'],  # this is also the default, it can be omitted
-  api_version = "2023-12-01-preview",
-  azure_endpoint=os.environ['AZURE_OPENAI_ENDPOINT'] 
-  )
+    api_key=os.environ['AZURE_OPENAI_KEY'],
+    azure_endpoint=os.environ['AZURE_OPENAI_ENDPOINT'], 
+    api_version = "2023-06-01-preview"
+    )
 
-model = os.environ['AZURE_OPENAI_DEPLOYMENT']
+print(os.environ['AZURE_OPENAI_KEY'])
+print(os.environ['AZURE_OPENAI_ENDPOINT'])
 
+model = 'dall-e-3'
 
 try:
     # Create an image by using the image generation API
 
     result = client.images.generate(
-        model=model,
+        model='dall-e-3',
         prompt='Bunny on horse, holding a lollipop, on a foggy meadow where it grows daffodils. It says "hello"',    # Enter your prompt text here
         size='1024x1024',
         n=1
