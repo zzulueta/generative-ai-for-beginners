@@ -25,7 +25,7 @@ try:
     # Create an image by using the image generation API
 
     result = client.images.generate(
-        model='dall-e-3',
+        model=model,
         prompt='Bunny on horse, holding a lollipop, on a foggy meadow where it grows daffodils. It says "hello"',    # Enter your prompt text here
         size='1024x1024',
         n=1
