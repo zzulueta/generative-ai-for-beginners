@@ -4,18 +4,30 @@ import json
 import logging
 from openai import AzureOpenAI
 from dotenv import load_dotenv
+from azure.cosmos import CosmosClient
 
 load_dotenv()
 
 # Set up logging
 #logging.basicConfig(level=logging.INFO)
 
+# Initialize Azure OpenAI client
 client = AzureOpenAI(
   api_key=os.environ['AZURE_OPENAI_KEY'],  # this is also the default, it can be omitted
   api_version = "2023-07-01-preview"
   )
-
 deployment=os.environ['AZURE_OPENAI_DEPLOYMENT']
+
+# Initialize Cosmos Client
+url = os.getenv('COSMOS_DB_ENDPOINT')
+key = os.getenv('COSMOS_DB_KEY')
+cosmosClient = CosmosClient(url, key)
+# Select database
+database_name = 'students'
+database = cosmosClient.get_database_client(database_name)
+# Select container
+container_name = 'students'
+container = database.get_container_client(container_name)
 
 # Get user input
 user_input = input("What do you like to find?\n")
@@ -66,6 +78,21 @@ functions = [
             "role"
          ]
       }
+   },
+   {
+      "name":"search_student",
+      "description":"Retrieves student based on the parameters provided",
+      "parameters":{
+         "type":"object",
+         "properties":{
+            "name":{
+               "type":"string",
+               "description":"The name of the student"},
+            }
+         },
+         "required":[
+             "name"
+         ]
    }
 ]
 
@@ -127,6 +154,12 @@ def search_exams(role='student', product='azure'):
             results.append({"title": title, "url": url})
     return str(results)
 
+# search_student("John Doe")
+def search_student(name):
+    name=name.lower()
+    query = f"SELECT * FROM c WHERE LOWER(c.name) = '{name}'"
+    items = list(container.query_items(query=query, enable_cross_partition_query=True))
+    return json.dumps(items)
 
 
 # Check if the model wants to call a function
@@ -140,10 +173,11 @@ if response_message.function_call.name:
     
     available_functions = {
             "search_courses": search_courses,
-            "search_exams": search_exams
+            "search_exams": search_exams,
+            "search_student": search_student
     }
     function_to_call = available_functions[function_name] 
-    
+   
     function_args = json.loads(response_message.function_call.arguments)
     function_response = function_to_call(**function_args)
 
