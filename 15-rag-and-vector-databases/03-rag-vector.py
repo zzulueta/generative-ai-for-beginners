@@ -73,6 +73,7 @@ async def main(query_term):
     # Suppress specific warning from semantic_kernel
     warnings.filterwarnings("ignore", message="You appear to be connected to a CosmosDB cluster")
 
+    # Create an Azure Cosmos DB Memory Store with the required parameters
     store = await AzureCosmosDBMemoryStore.create(
         cosmos_connstr=AZCOSMOS_CONNSTR,
         cosmos_api=AZCOSMOS_API,
@@ -91,7 +92,9 @@ async def main(query_term):
     # each time it calls the embedding model to generate embeddings from your query
     result = await memory.search(AZCOSMOS_CONTAINER_NAME, query_term)
 
+    # Create a chat function with the provided prompt and the required parameters
 
+    # Define a prompt template for the chatbot
     prompt = """
         You are a chatbot that can have a conversations about any topic related to the provided context.
         You will always provide answers in this sample format:
@@ -108,7 +111,7 @@ async def main(query_term):
         User: {{$query_term}}
         Chatbot:"""
 
-
+    # Set up execution settings for the OpenAI text prompt.
     execution_settings = sk_oai.OpenAITextPromptExecutionSettings(
     service_id="chat_completion",
         ai_model_id=openai.api_deployment_name,
@@ -117,6 +120,7 @@ async def main(query_term):
         top_p=0.5
     )
 
+    # Configure the prompt template with necessary input variables and execution settings
     chat_prompt_template_config = sk.PromptTemplateConfig(
         template=prompt,
         name="grounded_response",
@@ -128,12 +132,15 @@ async def main(query_term):
         execution_settings=execution_settings
     )
 
-
+    # Create a chat function using the defined prompt and template configuration
     chat_function = kernel.create_function_from_prompt(
         prompt=prompt,
-    function_name= "ChatGPTFunc2", plugin_name="chatGPTPlugin2", prompt_template_config=chat_prompt_template_config
+        function_name= "ChatGPTFunc2", 
+        plugin_name="chatGPTPlugin2", 
+        prompt_template_config=chat_prompt_template_config
     )
 
+    # Invoke the chat function with the query term and the database record
     completions_result = await kernel.invoke(chat_function, sk.KernelArguments(query_term=query_term, db_record=result[0].additional_metadata))
 
     print(completions_result)
