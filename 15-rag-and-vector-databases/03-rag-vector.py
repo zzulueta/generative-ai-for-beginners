@@ -147,6 +147,6 @@ async def main(query_term):
 
 
 # Run the main function
-asyncio.run(main("Bigyan mo ako ng detalye para sa mental health ng Northern Mindanao"))
+asyncio.run(main("Bigyan mo ako ng detalye para sa improvement of kidney transplant facilities in Zamboanga Peninsula."))
 
 
