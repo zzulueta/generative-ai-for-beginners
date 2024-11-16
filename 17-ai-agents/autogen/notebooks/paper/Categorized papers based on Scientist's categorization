@@ -1,0 +1,15 @@
+# Categorized papers based on Scientist's categorization
+categories = {
+    "Retrieval-Augmented Generation": 1,
+    "Fine Tuning": 1,
+    "Prompt Engineering": 1,
+    "Agents": 2
+}
+
+# Rank categories based on the number of papers
+sorted_categories = sorted(categories.items(), key=lambda x: x[1], reverse=True)
+
+# Print the ranked categories
+print("Ranked Categories:")
+for category, count in sorted_categories:
+    print(f"{category}: {count} papers")
